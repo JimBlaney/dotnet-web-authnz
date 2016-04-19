@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -7,10 +7,14 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("Esri.Services.WebAuthnz")]
 [assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Esri.Services.WebAuthnz")]
-[assembly: AssemblyCopyright("Copyright ©  2016")]
+#if DEBUG
+[assembly: AssemblyConfiguration("Debug")]
+#else
+[assembly: AssemblyConfiguration("Release")]
+#endif
+[assembly: AssemblyCompany("Esri")]
+[assembly: AssemblyProduct("Professional Services")]
+[assembly: AssemblyCopyright("Copyright © 2016 Esri")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
