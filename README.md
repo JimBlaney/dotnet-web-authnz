@@ -61,7 +61,7 @@ Modify the <tt>web.config</tt> file resemble the following:
     <modules>
       <!-- Esri's authentication module should come first -->
       <add name="EsriWebAuthnzModule-integrated" 
-           type="Esri.Services.WebAuthnz.EsriWebAuthnzModule, Esri.Services.WebAuthnz"/>
+           type="Esri.Services.WebAuthnz.Modules.EsriWebAuthnzModule, Esri.Services.WebAuthnz"/>
     </modules>
   </system.webServer>
 </configuration>
