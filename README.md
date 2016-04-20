@@ -26,8 +26,10 @@ Modify the <tt>web.config</tt> file resemble the following:
 <?xml version="1.0"?>
 <configuration>
   <configSections>
-    <section name="Esri.Services.WebAuthnz" type="Esri.Services.WebAuthnz.Config.AuthnzConfigSection, Esri.Services.WebAuthnz" />
-    <section name="log4net" type="log4net.Config.Log4NetConfigurationSectionHandler, log4net"/>
+    <section name="Esri.Services.WebAuthnz" 
+             type="Esri.Services.WebAuthnz.Config.AuthnzConfigSection, Esri.Services.WebAuthnz" />
+    <section name="log4net" 
+             type="log4net.Config.Log4NetConfigurationSectionHandler, log4net"/>
   </configSections>
   
   <Esri.Services.WebAuthnz requireHTTPS="false" 
@@ -78,9 +80,8 @@ There are three nodes permitted in the <tt>&lt;accessControl&gt;</tt> element:
 * <tt>prop</tt> (Proposition) -- the property <u>must exist</u> and <u>contain the value</u> within the <tt>EsriWebIdentity</tt> in order to grant access. If the property does not exist, this node will <u>always</u> evaluate to <tt>false</tt>. Comparison is <u>case-sensitive</u>.
   * <tt>@name</tt> -- The name of the property to evaluate.
   * <tt>@value</tt> -- The value of the property to evaluate. The dictionary of properties may contain multiple values for a given key.
-
   
-* All three nodes have a <tt>@negate</tt> attribute (default value: <tt>false</tt>), which will invert the logical output of the node's boolean evaluation. 
+All three nodes have a <tt>@negate</tt> attribute (default value: <tt>false</tt>), which will invert the logical output of the node's boolean evaluation. 
 
 The <tt>accessControl</tt> node behaves as a conjunction.
 
