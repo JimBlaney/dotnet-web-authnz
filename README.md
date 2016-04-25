@@ -67,6 +67,16 @@ Modify the <tt>web.config</tt> file resemble the following:
 </configuration>
 ```
 
+### WebAdaptor.config
+
+Modify the <tt>webadaptor.config</tt> file (found in the web adaptor folder (typically <tt>c:\inetpub\wwwroot\arcgis</tt>).
+
+* Locate the <tt>EnableGetRolesForUser</tt> property and change the value to false.
+
+```xml
+<EnableGetRolesForUser>false</EnableGetRolesForUser>
+```
+
 ### Access Control
 
 The <tt>EsriWebIdentityProvider</tt> concrete implementation produces an instance of <tt>EsriWebIdentity</tt>, which contains a <tt>Dictionary&lt;string, string[]&gt;</tt> of user attributes that are used to determine if the user has the authorization required to view the requested resource. At this time, the module can only be configured to act globally on an ASP.NET web application -- custom authorization ruels for separate <tt>location</tt> directives are not supported.
