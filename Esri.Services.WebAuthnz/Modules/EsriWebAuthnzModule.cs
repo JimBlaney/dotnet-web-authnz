@@ -87,6 +87,19 @@ namespace Esri.Services.WebAuthnz.Modules
                 throw;
             }
 
+            // set a header with the client certificate's DN, if specified
+            try
+            {
+                if (!string.IsNullOrEmpty(config.ClientDNHeader)
+                {
+                    req.Headers.Add(config.ClientDNHeader, req.ClientCertificate.Subject);
+                }
+            }
+            catch (Exception)
+            {
+                log.Warn("could not set client DN header");
+            }
+
             // perform the authorization check
             EsriWebIdentity esriIdentity = (EsriWebIdentity)identity;
             if (!config.IsAuthorized(esriIdentity))

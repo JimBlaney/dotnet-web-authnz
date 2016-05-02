@@ -25,7 +25,7 @@ namespace Esri.Services.WebAuthnz.Config
         {
             get
             {
-                return this["providerType"].ToString();
+                return this["providerType"] as string;
             }
         }
 
@@ -35,6 +35,15 @@ namespace Esri.Services.WebAuthnz.Config
             get
             {
                 return bool.Parse(this["requireHTTPS"].ToString());
+            }
+        }
+        
+        [ConfigurationProperty("clientDnHeader")]
+        public string ClientCertHeader
+        {
+            get
+            {
+                return this["providerType"] as string;
             }
         }
 
