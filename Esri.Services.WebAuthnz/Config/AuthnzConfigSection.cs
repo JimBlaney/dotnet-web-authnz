@@ -39,7 +39,7 @@ namespace Esri.Services.WebAuthnz.Config
         }
         
         [ConfigurationProperty("clientDnHeader")]
-        public string ClientCertHeader
+        public string ClientDNHeader
         {
             get
             {
