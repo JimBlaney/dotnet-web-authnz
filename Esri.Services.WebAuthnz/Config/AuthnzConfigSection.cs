@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Configuration;
 using System.Reflection;
 using System.Xml;
@@ -44,6 +44,19 @@ namespace Esri.Services.WebAuthnz.Config
             get
             {
                 return this["providerType"] as string;
+            }
+        }
+
+        [ConfigurationProperty("providerSettings")]
+        [ConfigurationCollection(typeof(NameValueCollection),
+                                 AddItemName = "add",
+                                 ClearItemsName = "clear",
+                                 RemoveItemName = "remove")]
+        public NameValueCollection ProviderSettings
+        {
+            get
+            {
+                return this["providerSettings"] as NameValueCollection;
             }
         }
 

@@ -19,6 +19,8 @@ namespace Esri.Services.WebAuthnz.Providers
             return GetIdentityImpl(context);
         }
 
+        public abstract void Initialize(NameValueCollection properties);
+
         protected abstract EsriWebIdentity GetIdentityImpl(HttpContext context);
 
         #region Logging

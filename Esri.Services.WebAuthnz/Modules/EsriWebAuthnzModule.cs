@@ -69,6 +69,17 @@ namespace Esri.Services.WebAuthnz.Modules
                 throw;
             }
 
+            // initialize the provider
+            try
+            {
+                identityProvider.Initialize(config.ProviderSettings);
+            }
+            catch (Exception)
+            {
+                log.ErrorFormat("unable to initialize provider");
+                throw;
+            }
+
             // get the identity from the provider
             IIdentity identity;
             try
@@ -90,7 +101,7 @@ namespace Esri.Services.WebAuthnz.Modules
             // set a header with the client certificate's DN, if specified
             try
             {
-                if (!string.IsNullOrEmpty(config.ClientDNHeader)
+                if (!string.IsNullOrEmpty(config.ClientDNHeader))
                 {
                     req.Headers.Add(config.ClientDNHeader, req.ClientCertificate.Subject);
                 }
