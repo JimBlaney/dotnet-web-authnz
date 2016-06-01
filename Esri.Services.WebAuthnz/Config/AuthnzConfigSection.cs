@@ -43,7 +43,7 @@ namespace Esri.Services.WebAuthnz.Config
         {
             get
             {
-                return this["providerType"] as string;
+                return this["clientDnHeader"] as string;
             }
         }
 
