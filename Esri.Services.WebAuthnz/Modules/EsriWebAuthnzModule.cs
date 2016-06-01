@@ -72,7 +72,7 @@ namespace Esri.Services.WebAuthnz.Modules
             // initialize the provider
             try
             {
-                identityProvider.Initialize(config.ProviderSettings);
+                identityProvider.Initialize(config.ProviderSettings.ConvertToNVC());
             }
             catch (Exception)
             {

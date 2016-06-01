@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
 using System.Reflection;
@@ -37,7 +38,7 @@ namespace Esri.Services.WebAuthnz.Config
                 return bool.Parse(this["requireHTTPS"].ToString());
             }
         }
-        
+
         [ConfigurationProperty("clientDnHeader")]
         public string ClientDNHeader
         {
@@ -47,16 +48,16 @@ namespace Esri.Services.WebAuthnz.Config
             }
         }
 
-        [ConfigurationProperty("providerSettings")]
-        [ConfigurationCollection(typeof(NameValueCollection),
-                                 AddItemName = "add",
-                                 ClearItemsName = "clear",
-                                 RemoveItemName = "remove")]
-        public NameValueCollection ProviderSettings
+        [ConfigurationProperty("providerSettings", IsDefaultCollection = true)]
+        public ConfigNameValueCollection ProviderSettings
         {
             get
             {
-                return this["providerSettings"] as NameValueCollection;
+                return this["providerSettings"] as ConfigNameValueCollection;
+            }
+            set
+            {
+                this["providerSettings"] = value;
             }
         }
 
@@ -86,6 +87,52 @@ namespace Esri.Services.WebAuthnz.Config
             }
 
             return this.AccessControl != null && this.AccessControl.Evaluate(new ReadOnlyDictionary<string, string[]>(dict));
+        }
+    }
+
+    [ConfigurationCollection(typeof(ConfigNameValueElement))]
+    public class ConfigNameValueCollection : ConfigurationElementCollection
+    {
+        protected override ConfigurationElement CreateNewElement()
+        {
+            return new ConfigNameValueElement();
+        }
+
+        protected override object GetElementKey(ConfigurationElement element)
+        {
+            return element.ElementInformation.LineNumber;
+        }
+
+        public NameValueCollection ConvertToNVC()
+        {
+            ConfigurationElement[] elements = new ConfigurationElement[this.Count];
+            this.CopyTo(elements, 0);
+
+            NameValueCollection nvc = new NameValueCollection();
+            foreach (ConfigurationElement element in elements)
+            {
+                ConfigNameValueElement cnve = (ConfigNameValueElement)element;
+                nvc.Add(cnve.Name, cnve.Value);
+            }
+
+            return nvc;
+        }
+    }
+
+    public class ConfigNameValueElement : ConfigurationElement
+    {
+        [ConfigurationProperty("key")]
+        public string Name
+        {
+            get { return this["key"] as string; }
+            set { this["key"] = value; }
+        }
+
+        [ConfigurationProperty("value")]
+        public string Value
+        {
+            get { return this["value"] as string; }
+            set { this["value"] = value; }
         }
     }
 }
