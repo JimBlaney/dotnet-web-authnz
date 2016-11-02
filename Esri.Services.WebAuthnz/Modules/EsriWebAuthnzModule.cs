@@ -34,7 +34,7 @@ namespace Esri.Services.WebAuthnz.Modules
             catch (Exception ex)
             {
                 log.Error("unable to load configuration", ex);
-                throw;
+                throw new HttpException(500, "configuration not available");
             }
 
             // refuse to service insecure requests if specified
@@ -54,7 +54,7 @@ namespace Esri.Services.WebAuthnz.Modules
             catch (Exception)
             {
                 log.ErrorFormat("unable to resolve type from providerType '{0}'", config.ProviderType != null ? config.ProviderType : "null");
-                throw;
+                throw new HttpException(500, "provider type not available");
             }
 
             // create an instance of the provider
@@ -66,7 +66,7 @@ namespace Esri.Services.WebAuthnz.Modules
             catch (Exception)
             {
                 log.ErrorFormat("unable to create instance of provider '{0}'", providerType.FullName);
-                throw;
+                throw new HttpException(500, "provider not available");
             }
 
             // initialize the provider
@@ -77,7 +77,7 @@ namespace Esri.Services.WebAuthnz.Modules
             catch (Exception)
             {
                 log.ErrorFormat("unable to initialize provider");
-                throw;
+                throw new HttpException(500, "provider error");
             }
 
             // get the identity from the provider
@@ -95,7 +95,7 @@ namespace Esri.Services.WebAuthnz.Modules
             catch (Exception ex)
             {
                 log.Error("error while obtaining identity", ex);
-                throw;
+                throw new HttpException(403, "unable to authorize with service provider");
             }
 
             // set a header with the client certificate's DN, if specified
@@ -108,7 +108,7 @@ namespace Esri.Services.WebAuthnz.Modules
             }
             catch (Exception)
             {
-                log.Warn("could not set client DN header");
+                log.Warn("did not set client DN header");
             }
 
             // perform the authorization check
