@@ -2,7 +2,7 @@
 
 An ASP.NET module library that provides an extensible interface for integration of various authentication and authorization integration providers.
 
-This module was meant to be used within the [ArcGIS Web Adaptor](http://server.arcgis.com/en/server/latest/install/windows/about-the-arcgis-web-adaptor.htm) (IIS), in order to provide a custom principal to the Web GIS platform ([ArcGIS for Server](http://server.arcgis.com/en/server/) and [Portal for ArcGIS](http://server.arcgis.com/en/portal/)) in caases where standard configurations are not possible.
+This module was meant to be used within the [ArcGIS Web Adaptor](http://server.arcgis.com/en/server/latest/install/windows/about-the-arcgis-web-adaptor.htm) (IIS), in order to provide a custom principal to the Web GIS platform ([ArcGIS for Server](http://server.arcgis.com/en/server/) and [Portal for ArcGIS](http://server.arcgis.com/en/portal/)) in cases where standard configurations are not possible.
 
 ## Dependencies
 
