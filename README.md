@@ -33,7 +33,7 @@ Modify the <tt>web.config</tt> file resemble the following:
   </configSections>
   
   <Esri.Services.WebAuthnz requireHTTPS="false" 
-                           providerType="Esri.Services.WebAuthnz.Providers.Impl.MyProvider, Esri.Services.WebAuthnz"
+                           providerType="Esri.Services.WebAuthnz.Providers.Impl.CommonNameIdentityProvider, Esri.Services.WebAuthnz"
                            clientDnHeader="X-On-Behalf-Of">
     <accessControl>
       <!-- 

@@ -18,6 +18,6 @@ namespace Esri.Services.WebAuthnz.Providers
         /// </summary>
         /// <param name="context">Value will never be passed in as <tt>null</tt></param>
         /// <returns></returns>
-        EsriWebIdentity GetIdentity(HttpContext context);
+        EsriWebIdentity GetIdentity(HttpApplication context);
     }
 }

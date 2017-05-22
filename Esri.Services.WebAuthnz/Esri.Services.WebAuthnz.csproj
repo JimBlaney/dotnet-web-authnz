@@ -45,12 +45,14 @@
   <ItemGroup>
     <Compile Include="Config\AuthnzConfigSection.cs" />
     <Compile Include="DataStructures\ReadOnlyDictionary.cs" />
+    <Compile Include="Exceptions\EsriAuthnzException.cs" />
     <Compile Include="Logic\Conjunction.cs" />
     <Compile Include="Logic\Disjunction.cs" />
     <Compile Include="Logic\ILogicalTruth.cs" />
     <Compile Include="Logic\ILogicalTruthCollection.cs" />
     <Compile Include="Logic\Proposition.cs" />
     <Compile Include="Modules\EsriWebAuthnzModule.cs" />
+    <Compile Include="Providers\Impl\CommonNameIdentityProvider.cs" />
     <Compile Include="Principal\EsriWebIdentity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\EsriWebIdentityProvider.cs" />

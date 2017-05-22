@@ -8,11 +8,11 @@ using log4net;
 
 namespace Esri.Services.WebAuthnz.Providers
 {
-    public abstract class EsriWebIdentityProvider<T> : IEsriWebIdentityProvider
+    public abstract class EsriWebIdentityProvider : IEsriWebIdentityProvider
     {
-        private static readonly ILog log = LogManager.GetLogger(typeof(T));
+        private static readonly ILog log = LogManager.GetLogger(typeof(EsriWebIdentityProvider));
 
-        public EsriWebIdentity GetIdentity(HttpContext context)
+        public EsriWebIdentity GetIdentity(HttpApplication context)
         {
             // TODO caching (optional)
 
@@ -21,40 +21,6 @@ namespace Esri.Services.WebAuthnz.Providers
 
         public abstract void Initialize(NameValueCollection properties);
 
-        protected abstract EsriWebIdentity GetIdentityImpl(HttpContext context);
-
-        #region Logging
-
-        protected void Debug(object message)
-        {
-            log.Debug(message);
-        }
-
-        protected void DebugFormat(string format, params object[] args)
-        {
-            log.DebugFormat(format, args);
-        }
-
-        protected void Info(object message)
-        {
-            log.Info(message);
-        }
-
-        protected void InfoFormat(string format, params object[] args)
-        {
-            log.InfoFormat(format, args);
-        }
-
-        protected void Warn(object message)
-        {
-            log.Warn(message);
-        }
-
-        protected void WarnFormat(string format, params object[] args)
-        {
-            log.WarnFormat(format, args);
-        }
-
-        #endregion
+        protected abstract EsriWebIdentity GetIdentityImpl(HttpApplication context);
     }
 }
