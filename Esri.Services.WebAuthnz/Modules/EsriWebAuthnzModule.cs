@@ -14,19 +14,14 @@ namespace Esri.Services.WebAuthnz.Modules
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(EsriWebAuthnzModule));
 
+        private AuthnzConfigSection config = null;
+        private IEsriWebIdentityProvider identityProvider = null;
+
         public void Init(HttpApplication context)
         {
-            context.AuthenticateRequest += Module_AuthenticateRequest;
-        }
-
-        void Module_AuthenticateRequest(object sender, EventArgs e)
-        {
-            HttpContext context = HttpContext.Current;
-            HttpRequest req = context.Request;
-            HttpResponse res = context.Response;
-
+            context.BeginRequest += Module_BeginRequest;
+            
             // load the configuration section from Web.config
-            AuthnzConfigSection config = null;
             try
             {
                 config = AuthnzConfigSection.GetConfig();
@@ -35,13 +30,6 @@ namespace Esri.Services.WebAuthnz.Modules
             {
                 log.Error("unable to load configuration", ex);
                 throw new HttpException(500, "configuration not available");
-            }
-
-            // refuse to service insecure requests if specified
-            if (config.RequireHTTPS && !req.IsSecureConnection)
-            {
-                log.InfoFormat("{0} {1} {2} {3} {4}", req.Url.Scheme, req.HttpMethod, req.Url.PathAndQuery, "?", 403);
-                throw new HttpException(403, "must use HTTPS");
             }
 
             // resolve the provider type from the type's name
@@ -58,7 +46,6 @@ namespace Esri.Services.WebAuthnz.Modules
             }
 
             // create an instance of the provider
-            IEsriWebIdentityProvider identityProvider = null;
             try
             {
                 identityProvider = (IEsriWebIdentityProvider)Activator.CreateInstance(providerType);
@@ -78,6 +65,20 @@ namespace Esri.Services.WebAuthnz.Modules
             {
                 log.ErrorFormat("unable to initialize provider");
                 throw new HttpException(500, "provider error");
+            }
+        }
+
+        void Module_BeginRequest(object sender, EventArgs e)
+        {
+            HttpApplication context = (HttpApplication)sender;
+            HttpRequest req = context.Request;
+            HttpResponse res = context.Response;
+            
+            // refuse to service insecure requests if specified
+            if (config.RequireHTTPS && !req.IsSecureConnection)
+            {
+                log.InfoFormat("{0} {1} {2} {3} {4}", req.Url.Scheme, req.HttpMethod, req.Url.PathAndQuery, "?", 403);
+                throw new HttpException(403, "must use HTTPS");
             }
 
             // get the identity from the provider
@@ -120,7 +121,7 @@ namespace Esri.Services.WebAuthnz.Modules
 
             // set the identity for the user
             log.InfoFormat("{0} {1} {2} {3} {4}", req.Url.Scheme, req.HttpMethod, req.Url.PathAndQuery, identity.Name, 200);
-            context.User = new GenericPrincipal(identity, null);
+            HttpContext.Current.User = new GenericPrincipal(identity, null);
         }
 
         public void Dispose() { /* do nothing */ }
