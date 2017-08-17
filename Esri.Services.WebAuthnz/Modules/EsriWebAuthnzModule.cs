@@ -19,60 +19,38 @@ namespace Esri.Services.WebAuthnz.Modules
 
         public void Init(HttpApplication context)
         {
-            context.BeginRequest += Module_BeginRequest;
+            context.AuthenticateRequest += Module_AuthenticateRequest;
+            context.EndRequest += Module_EndRequest;
             
             // load the configuration section from Web.config
             try
             {
                 config = AuthnzConfigSection.GetConfig();
+                Type providerType = Type.GetType(config.ProviderType);
+                
+                identityProvider = (IEsriWebIdentityProvider)Activator.CreateInstance(providerType);
+                identityProvider.Initialize(config.ProviderSettings.ConvertToNVC());
             }
             catch (Exception ex)
             {
-                log.Error("unable to load configuration", ex);
-                throw new HttpException(500, "configuration not available");
-            }
-
-            // resolve the provider type from the type's name
-            Type providerType;
-            try
-            {
-                string providerTypeName = config.ProviderType;
-                providerType = Type.GetType(providerTypeName);
-            }
-            catch (Exception)
-            {
-                log.ErrorFormat("unable to resolve type from providerType '{0}'", config.ProviderType != null ? config.ProviderType : "null");
-                throw new HttpException(500, "provider type not available");
-            }
-
-            // create an instance of the provider
-            try
-            {
-                identityProvider = (IEsriWebIdentityProvider)Activator.CreateInstance(providerType);
-            }
-            catch (Exception)
-            {
-                log.ErrorFormat("unable to create instance of provider '{0}'", providerType.FullName);
-                throw new HttpException(500, "provider not available");
-            }
-
-            // initialize the provider
-            try
-            {
-                identityProvider.Initialize(config.ProviderSettings.ConvertToNVC());
-            }
-            catch (Exception)
-            {
-                log.ErrorFormat("unable to initialize provider");
-                throw new HttpException(500, "provider error");
+                log.Error("unable to create instance of provider", ex);
             }
         }
 
-        void Module_BeginRequest(object sender, EventArgs e)
+        void Module_AuthenticateRequest(object sender, EventArgs e)
         {
             HttpApplication context = (HttpApplication)sender;
             HttpRequest req = context.Request;
-            HttpResponse res = context.Response;
+            
+            if (config == null)
+            {
+                throw new HttpException(500, "configuration not available");
+            }
+            
+            if (identityProvider == null)
+            {
+                throw new HttpException(500, "identity provider not available");
+            }
             
             // refuse to service insecure requests if specified
             if (config.RequireHTTPS && !req.IsSecureConnection)
@@ -96,6 +74,7 @@ namespace Esri.Services.WebAuthnz.Modules
             catch (Exception ex)
             {
                 log.Error("error while obtaining identity", ex);
+                log.InfoFormat("{0} {1} {2} {3} {4}", req.Url.Scheme, req.HttpMethod, req.Url.PathAndQuery, "?", 403);
                 throw new HttpException(403, "unable to authorize with service provider");
             }
 
@@ -109,19 +88,28 @@ namespace Esri.Services.WebAuthnz.Modules
             }
             catch (Exception)
             {
-                log.Warn("did not set client DN header");
+                log.Warn("could not set client DN header");
             }
 
             // perform the authorization check
             EsriWebIdentity esriIdentity = (EsriWebIdentity)identity;
             if (!config.IsAuthorized(esriIdentity))
             {
+                log.InfoFormat("{0} {1} {2} {3} {4}", req.Url.Scheme, req.HttpMethod, req.Url.PathAndQuery, identity.Name, 403);
                 throw new HttpException(403, "unauthorized");
             }
 
             // set the identity for the user
-            log.InfoFormat("{0} {1} {2} {3} {4}", req.Url.Scheme, req.HttpMethod, req.Url.PathAndQuery, identity.Name, 200);
             HttpContext.Current.User = new GenericPrincipal(identity, null);
+        }
+        
+        private void Module_EndRequest(object sender, EventArgs e)
+        {
+            HttpApplication context = (HttpApplication)sender;
+            HttpRequest req = context.Request;
+            HttpResponse res = context.Response;
+        
+            log.InfoFormat("{0} {1} {2} {3} {4}", req.Url.Scheme, req.HttpMethod, req.Url.PathAndQuery, context.Context.User.Identity.Name, res.StatusCode);
         }
 
         public void Dispose() { /* do nothing */ }
