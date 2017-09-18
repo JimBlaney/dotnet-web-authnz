@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Security.Principal;
 using System.Web;
 
@@ -17,6 +19,8 @@ namespace Esri.Services.WebAuthnz.Modules
         private AuthnzConfigSection config = null;
         private IEsriWebIdentityProvider identityProvider = null;
 
+        private List<String> whitelist = new List<String>();
+
         public void Init(HttpApplication context)
         {
             context.AuthenticateRequest += Module_AuthenticateRequest;
@@ -30,6 +34,15 @@ namespace Esri.Services.WebAuthnz.Modules
                 
                 identityProvider = (IEsriWebIdentityProvider)Activator.CreateInstance(providerType);
                 identityProvider.Initialize(config.ProviderSettings.ConvertToNVC());
+
+                if (config.WhitelistedIPs != null)
+                {
+                    NameValueCollection nvc = config.WhitelistedIPs.ConvertToNVC();
+                    foreach (String key in nvc.Keys)
+                    {
+                        whitelist.Add(nvc[key]);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -57,6 +70,13 @@ namespace Esri.Services.WebAuthnz.Modules
             {
                 log.InfoFormat("{0} {1} {2} {3} {4}", req.Url.Scheme, req.HttpMethod, req.Url.PathAndQuery, "?", 403);
                 throw new HttpException(403, "must use HTTPS");
+            }
+
+            // check the whitelist before checking the identity provider
+            if (whitelist.IndexOf(req.UserHostAddress) > -1)
+            {
+                log.InfoFormat("Whitelisted IP {0} allowed", req.UserHostAddress);
+                return;
             }
 
             // get the identity from the provider
@@ -99,8 +119,11 @@ namespace Esri.Services.WebAuthnz.Modules
                 throw new HttpException(403, "unauthorized");
             }
 
-            // set the identity for the user
-            HttpContext.Current.User = new GenericPrincipal(identity, null);
+            // set the identity for the user if specified
+            if (config.SetPrincipal)
+            {
+                HttpContext.Current.User = new GenericPrincipal(identity, null);
+            }
         }
         
         private void Module_EndRequest(object sender, EventArgs e)
@@ -109,7 +132,13 @@ namespace Esri.Services.WebAuthnz.Modules
             HttpRequest req = context.Request;
             HttpResponse res = context.Response;
         
-            log.InfoFormat("{0} {1} {2} {3} {4}", req.Url.Scheme, req.HttpMethod, req.Url.PathAndQuery, context.Context.User.Identity.Name, res.StatusCode);
+            log.InfoFormat(
+                "{0} {1} {2} {3} {4}", 
+                req.Url.Scheme,
+                req.HttpMethod, 
+                req.Url.PathAndQuery,
+                context.Context.User != null ? context.Context.User.Identity.Name : "?", 
+                res.StatusCode);
         }
 
         public void Dispose() { /* do nothing */ }

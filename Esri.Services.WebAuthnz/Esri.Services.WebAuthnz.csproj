@@ -29,6 +29,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>keypair.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.2.0.8\lib\net35-full\log4net.dll</HintPath>
@@ -53,6 +59,7 @@
     <Compile Include="Logic\ILogicalTruthCollection.cs" />
     <Compile Include="Logic\Proposition.cs" />
     <Compile Include="Modules\EsriWebAuthnzModule.cs" />
+    <Compile Include="Providers\Impl\ACCIdentityProvider.cs" />
     <Compile Include="Providers\Impl\CommonNameIdentityProvider.cs" />
     <Compile Include="Principal\EsriWebIdentity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -60,7 +67,9 @@
     <Compile Include="Providers\IEsriWebIdentityProvider.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="keypair.snk" />
     <None Include="packages.config" />
+    <None Include="sn.key.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

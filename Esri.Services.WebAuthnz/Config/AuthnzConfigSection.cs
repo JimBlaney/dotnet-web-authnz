@@ -39,6 +39,15 @@ namespace Esri.Services.WebAuthnz.Config
             }
         }
 
+        [ConfigurationProperty("setPrincipal")]
+        public bool SetPrincipal
+        {
+            get
+            {
+                return bool.Parse(this["setPrincipal"].ToString());
+            }
+        }
+
         [ConfigurationProperty("clientDnHeader")]
         public string ClientDNHeader
         {
@@ -58,6 +67,19 @@ namespace Esri.Services.WebAuthnz.Config
             set
             {
                 this["providerSettings"] = value;
+            }
+        }
+
+        [ConfigurationProperty("whitelistedIPs", IsDefaultCollection = true)]
+        public ConfigNameValueCollection WhitelistedIPs
+        {
+            get
+            {
+                return this["whitelistedIPs"] as ConfigNameValueCollection;
+            }
+            set
+            {
+                this["whitelistedIPs"] = value;
             }
         }
 
