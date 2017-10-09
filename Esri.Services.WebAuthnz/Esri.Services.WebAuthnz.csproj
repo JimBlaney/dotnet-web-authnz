@@ -50,6 +50,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Authorization\DecisionPoint.cs" />
+    <Compile Include="Authorization\Decision.cs" />
+    <Compile Include="Authorization\Evidence.cs" />
     <Compile Include="Config\AuthnzConfigSection.cs" />
     <Compile Include="DataStructures\ReadOnlyDictionary.cs" />
     <Compile Include="Exceptions\EsriAuthnzException.cs" />

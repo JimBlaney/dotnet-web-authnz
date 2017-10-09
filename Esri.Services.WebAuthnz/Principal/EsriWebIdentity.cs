@@ -9,7 +9,7 @@ namespace Esri.Services.WebAuthnz.Principal
         private readonly Dictionary<string, string[]> _attributes;
 
         public EsriWebIdentity(string name, Dictionary<string, string[]> attributes = null, string providerName = "?")
-            : base(name, string.Format("Esri.Services.WebAuthnz/{0}", providerName))
+            : base(name, providerName)
         {
             this._attributes = attributes;
         }

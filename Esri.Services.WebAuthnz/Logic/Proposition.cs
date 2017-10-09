@@ -24,5 +24,14 @@ namespace Esri.Services.WebAuthnz.Logic
 
             return present && (Negate ^ match);
         }
+
+        public override string ToString()
+        {
+            return string.Format(
+                "'{0}' {1} '{2}'", 
+                this.Name,
+                this.Negate ? "!=" : "==",
+                this.Value);
+        }
     }
 }

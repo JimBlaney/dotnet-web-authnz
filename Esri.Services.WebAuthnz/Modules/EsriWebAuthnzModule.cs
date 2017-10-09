@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.Security.Principal;
 using System.Web;
 
+using Esri.Services.WebAuthnz.Authorization;
 using Esri.Services.WebAuthnz.Config;
 using Esri.Services.WebAuthnz.Principal;
 using Esri.Services.WebAuthnz.Providers;
@@ -19,6 +20,8 @@ namespace Esri.Services.WebAuthnz.Modules
         private AuthnzConfigSection config = null;
         private IEsriWebIdentityProvider identityProvider = null;
 
+        private DecisionPoint decisionPoint = null;
+
         private List<String> whitelist = new List<String>();
 
         public void Init(HttpApplication context)
@@ -30,6 +33,9 @@ namespace Esri.Services.WebAuthnz.Modules
             try
             {
                 config = AuthnzConfigSection.GetConfig();
+
+                decisionPoint = new DecisionPoint(config.AccessControl);
+
                 Type providerType = Type.GetType(config.ProviderType);
                 
                 identityProvider = (IEsriWebIdentityProvider)Activator.CreateInstance(providerType);
@@ -68,13 +74,14 @@ namespace Esri.Services.WebAuthnz.Modules
             // refuse to service insecure requests if specified
             if (config.RequireHTTPS && !req.IsSecureConnection)
             {
-                log.InfoFormat("{0} {1} {2} {3} {4}", req.Url.Scheme, req.HttpMethod, req.Url.PathAndQuery, "?", 403);
+                LogEvent(req, "?", 403);
                 throw new HttpException(403, "must use HTTPS");
             }
 
             // check the whitelist before checking the identity provider
             if (whitelist.IndexOf(req.UserHostAddress) > -1)
             {
+                LogEvent(req, "WHITELIST", 200);
                 log.InfoFormat("Whitelisted IP {0} allowed", req.UserHostAddress);
                 return;
             }
@@ -87,14 +94,14 @@ namespace Esri.Services.WebAuthnz.Modules
 
                 if (identity == null)
                 {
-                    log.InfoFormat("{0} {1} {2} {3} {4}", req.Url.Scheme, req.HttpMethod, req.Url.PathAndQuery, "?", 403);
+                    LogEvent(req, "?", 403);
                     throw new HttpException(403, "no identity found");
                 }
             }
             catch (Exception ex)
             {
                 log.Error("error while obtaining identity", ex);
-                log.InfoFormat("{0} {1} {2} {3} {4}", req.Url.Scheme, req.HttpMethod, req.Url.PathAndQuery, "?", 403);
+                LogEvent(req, "?", 403);
                 throw new HttpException(403, "unable to authorize with service provider");
             }
 
@@ -103,7 +110,7 @@ namespace Esri.Services.WebAuthnz.Modules
             {
                 if (!string.IsNullOrEmpty(config.ClientDNHeader))
                 {
-                    req.Headers.Add(config.ClientDNHeader, req.ClientCertificate.Subject);
+                    req.Headers.Set(config.ClientDNHeader, req.ClientCertificate.Subject);
                 }
             }
             catch (Exception)
@@ -113,11 +120,14 @@ namespace Esri.Services.WebAuthnz.Modules
 
             // perform the authorization check
             EsriWebIdentity esriIdentity = (EsriWebIdentity)identity;
-            if (!config.IsAuthorized(esriIdentity))
+            Decision authorizationDecision = decisionPoint.Decide(esriIdentity);
+            if (authorizationDecision == null || !authorizationDecision.IsAuthorized)
             {
-                log.InfoFormat("{0} {1} {2} {3} {4}", req.Url.Scheme, req.HttpMethod, req.Url.PathAndQuery, identity.Name, 403);
+                LogEvent(req, identity.Name, 403);
                 throw new HttpException(403, "unauthorized");
             }
+            
+            req.Headers.Set("X-Auth-Evidence", authorizationDecision.Evidence.ToString());
 
             // set the identity for the user if specified
             if (config.SetPrincipal)
@@ -131,16 +141,25 @@ namespace Esri.Services.WebAuthnz.Modules
             HttpApplication context = (HttpApplication)sender;
             HttpRequest req = context.Request;
             HttpResponse res = context.Response;
-        
-            log.InfoFormat(
-                "{0} {1} {2} {3} {4}", 
-                req.Url.Scheme,
-                req.HttpMethod, 
-                req.Url.PathAndQuery,
-                context.Context.User != null ? context.Context.User.Identity.Name : "?", 
+
+            LogEvent(
+                req,
+                context.Context.User != null ? context.Context.User.Identity.Name : "?",
                 res.StatusCode);
         }
 
         public void Dispose() { /* do nothing */ }
+
+        private void LogEvent(HttpRequest req, string identity, int statusCode)
+        {
+            log.InfoFormat(
+                "{0} {1} {2} {3} {4} {5}",
+                req.UserHostAddress,
+                req.Url.Scheme,
+                req.HttpMethod,
+                req.Url.PathAndQuery,
+                identity,
+                statusCode);
+        }
     }
 }

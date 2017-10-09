@@ -21,6 +21,15 @@ namespace Esri.Services.WebAuthnz.Config
             return ConfigurationManager.GetSection(sectionName) as AuthnzConfigSection;
         }
 
+        [ConfigurationProperty("applicationName", IsRequired = true)]
+        public string ApplicationName
+        {
+            get
+            {
+                return this["applicationName"] as string;
+            }
+        }
+
         [ConfigurationProperty("providerType", IsRequired = true)]
         public string ProviderType
         {
@@ -98,17 +107,6 @@ namespace Esri.Services.WebAuthnz.Config
             {
                 return false;
             }
-        }
-
-        public bool IsAuthorized(EsriWebIdentity esriIdentity)
-        {
-            Dictionary<string, string[]> dict = new Dictionary<string, string[]>();
-            foreach (string key in esriIdentity.Keys)
-            {
-                dict.Add(key, esriIdentity[key]);
-            }
-
-            return this.AccessControl != null && this.AccessControl.Evaluate(new ReadOnlyDictionary<string, string[]>(dict));
         }
     }
 

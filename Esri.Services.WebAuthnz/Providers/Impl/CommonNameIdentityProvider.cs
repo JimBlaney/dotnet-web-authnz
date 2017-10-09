@@ -58,7 +58,7 @@ namespace Esri.Services.WebAuthnz.Providers.Impl
                 Dictionary < string, string[]> attributes = new Dictionary<string, string[]>();
                 //attributes.Add("AWESOME", new string[] { "VERY" });
 
-                identity = new EsriWebIdentity(cn, attributes, this.GetType().Name);
+                identity = new EsriWebIdentity(cn, attributes, this.GetType().FullName);
             }
             catch (Exception ex)
             {
